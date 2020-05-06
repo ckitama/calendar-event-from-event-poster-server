@@ -1,0 +1,317 @@
+openapi: 3.0.1
+info:
+  title: NLP API
+  description: API for calling various NLP methods
+  version: 1.0.0
+servers:
+- url: /
+tags:
+- name: estnlp
+  description: NLP tools for Estonian
+- name: genericnlp
+  description: NLP tools for other input languages
+paths:
+  /:
+    get:
+      operationId: root_get
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Welcome to the NLP API
+                x-content-type: text/plain
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /autonlp/ner:
+    post:
+      tags:
+      - autonlp
+      summary: Convenience endpoint that delegates work to either estnlp or genericnlp
+        tools based on input language.
+      operationId: auto_ner
+      requestBody:
+        description: Input text in any language
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TextDto'
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoNerResultDto'
+        default:
+          description: Invalid Request
+          content: {}
+      x-codegen-request-body-name: body
+      x-openapi-router-controller: swagger_server.controllers.autonlp_controller
+  /estnlp/ner:
+    post:
+      tags:
+      - estnlp
+      summary: Helps with named entity recognition using estnltk. Extended to also
+        include temporal info.
+      operationId: est_ner
+      requestBody:
+        description: Input text in Estonian
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TextDto'
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstNerResultDto'
+        default:
+          description: Invalid Request
+          content: {}
+      x-codegen-request-body-name: body
+      x-openapi-router-controller: swagger_server.controllers.estnlp_controller
+  /genericnlp/ner:
+    post:
+      tags:
+      - genericnlp
+      summary: Helps with named entity recognition using spaCy. Additionaly uses TextBlob
+        to detect input text's language and translate it to English if necessary (as
+        spaCy works best in English).
+      operationId: generic_ner
+      requestBody:
+        description: Input text in any language
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TextDto'
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericNerResultDto'
+        default:
+          description: Invalid Request
+          content: {}
+      x-codegen-request-body-name: body
+      x-openapi-router-controller: swagger_server.controllers.genericnlp_controller
+components:
+  schemas:
+    TextDto:
+      type: array
+      description: Can be an array of words, phrases, sentences etc.
+      items:
+        type: string
+    AutoNerResultDto:
+      type: object
+      properties:
+        per:
+          type: array
+          items:
+            type: string
+        org:
+          type: array
+          items:
+            type: string
+        loc:
+          type: array
+          items:
+            type: string
+        start:
+          type: string
+          description: Starting time in ISO 8601 format
+        end:
+          type: string
+          description: Ending time in ISO 8601 format
+      example:
+        loc:
+        - loc
+        - loc
+        org:
+        - org
+        - org
+        start: start
+        end: end
+        per:
+        - per
+        - per
+    EstNerResultDto:
+      type: object
+      properties:
+        per:
+          type: array
+          items:
+            type: string
+        org:
+          type: array
+          items:
+            type: string
+        loc:
+          type: array
+          items:
+            type: string
+        start:
+          type: string
+          description: Starting time in ISO 8601 format
+        end:
+          type: string
+          description: Ending time in ISO 8601 format
+      example:
+        loc:
+        - loc
+        - loc
+        org:
+        - org
+        - org
+        start: start
+        end: end
+        per:
+        - per
+        - per
+    GenericNerResultDto:
+      type: object
+      properties:
+        person:
+          type: array
+          items:
+            type: string
+        norp:
+          type: array
+          items:
+            type: string
+        fac:
+          type: array
+          items:
+            type: string
+        org:
+          type: array
+          items:
+            type: string
+        gpe:
+          type: array
+          items:
+            type: string
+        loc:
+          type: array
+          items:
+            type: string
+        product:
+          type: array
+          items:
+            type: string
+        event:
+          type: array
+          items:
+            type: string
+        work_of_art:
+          type: array
+          items:
+            type: string
+        law:
+          type: array
+          items:
+            type: string
+        language:
+          type: array
+          items:
+            type: string
+        date:
+          type: array
+          items:
+            type: string
+        time:
+          type: array
+          items:
+            type: string
+        percent:
+          type: array
+          items:
+            type: string
+        money:
+          type: array
+          items:
+            type: string
+        quantity:
+          type: array
+          items:
+            type: string
+        ordinal:
+          type: array
+          items:
+            type: string
+        cardinal:
+          type: array
+          items:
+            type: string
+        start:
+          type: string
+          description: Starting time in ISO 8601 format
+        end:
+          type: string
+          description: Ending time in ISO 8601 format
+      example:
+        date:
+        - date
+        - date
+        loc:
+        - loc
+        - loc
+        product:
+        - product
+        - product
+        law:
+        - law
+        - law
+        quantity:
+        - quantity
+        - quantity
+        org:
+        - org
+        - org
+        start: start
+        fac:
+        - fac
+        - fac
+        language:
+        - language
+        - language
+        work_of_art:
+        - work_of_art
+        - work_of_art
+        cardinal:
+        - cardinal
+        - cardinal
+        norp:
+        - norp
+        - norp
+        percent:
+        - percent
+        - percent
+        money:
+        - money
+        - money
+        person:
+        - person
+        - person
+        end: end
+        time:
+        - time
+        - time
+        event:
+        - event
+        - event
+        gpe:
+        - gpe
+        - gpe
+        ordinal:
+        - ordinal
+        - ordinal
+
